@@ -1,80 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const ObjectId = require('mongodb').ObjectId;
-const Employee = require('../models/employee.model');
 
-router.get('/employees', async (req, res) => {
-  try{
-    res.json( await Employee.find());
-  }
-  catch(err) {
-    res.status(500).json({ message: err});
-  }
-});
+const employeesController = require('../controllers/employees.controller');
 
-router.get('/employees/random', async (req, res) => {
-  try {
-    const count = await Employee.countDocuments();
-    const rand = Math.floor(Math.random() * count);
-    const dep = await Employee.findOne().skip(rand);
-    if(!dep) res.status(404).json({message: 'Not found'});
-    else res.json(dep);
-  }
-  catch(err){
-    res.status(500).json({ message: err });
-  }
-});
+router.get('/employees', employeesController.getAll);
 
-router.get('/employees/:id', async (req, res) => {
-  try{
-    const dep = await Employee.findById(req.params.id);
-    if(!dep) res.status(404).json({message: 'not found'});
-    else res.json(dep);
-  }
-  catch(err) {
-    res.status(500).json({ message: err });
-  }
-});
+router.get('/employees/random', employeesController.getRandom);
 
-router.post('/employees', async (req, res) => {
-  try{
-    const { firstName, lastName, department } = req.body;
-    const NewEmployee = new Employee({ firstName: firstName, lastName: lastName, department: department});
-    await NewEmployee.save();
-    res.json( await Employee.find());
-  }
-  catch(err){
-    res.status(500).json({ message: err });
-  }
-});
+router.get('/employees/:id', employeesController.getEmployeeById);
 
-router.put('/employees/:id', async (req, res) => {
-  const { firstName, lastName, department } = req.body;
-  try {
-  const dep = await(Employee.findById(req.params.id));
-  if(dep){
-    await Employee.updateOne({ _id : req.params.id}, {$set: {firstName: firstName, lastName: lastName, department: department}});
-    res.json({ message : 'Ok'});
-  }
-  else res.status(404).json({message : 'not found'});
-  }
-  catch(err){
-    res.status(500).json({message: err});
-  }
-});
+router.post('/employees', employeesController.postEmployee);
 
-router.delete('/employees/:id', async (req, res) => {
-  try {
-    const dep = await (Employee.findById(req.params.id));
-    if(dep){
-      await Employee.deleteOne({ _id: req.params.id});
-      res.json( await Employee.find());
-    }
-    else res.status(404).json({ message : 'not found'});
-    }
-    catch(err){
-      res.status(500).json({message : err});
-    }
-});
+router.put('/employees/:id', employeesController.putEmployeeById);
+
+router.delete('/employees/:id', employeesController.deleteEmployee);
 
 module.exports = router;
