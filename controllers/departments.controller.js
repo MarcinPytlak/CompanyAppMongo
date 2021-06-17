@@ -38,6 +38,7 @@ exports.getAll = async (req, res) => {
       const { name } = req.body;
       const newDepartment = new Department({ name: name });
       await newDepartment.save();
+      res.json({ message: 'OK' });
       res.json( await Department.find());
     } catch(err) {
       res.status(500).json({ message: err });
